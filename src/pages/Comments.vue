@@ -47,7 +47,7 @@
 
 <script>
     import {notification,message} from 'ant-design-vue'
-    import {web3,saveJsonOnIpfs,ProductListContract,readJsonFromIpfs} from '../config'
+    import {web3,saveJsonOnIpfs,getProductContract,readJsonFromIpfs} from '../config'
     export default {
         name: "comments",
         data () {
@@ -57,7 +57,8 @@
                 account:'',
                 answer:'',
                 showModal:false,
-                content:''
+                content:'',
+                address:''
             }
         },
         created () {
@@ -65,8 +66,11 @@
         },
         methods:{
             async init () {
+                window.web3.currentProvider.enable()
+                this.address = this.$route.path.slice(8)
                 let [account] = await web3.eth.getAccounts()
-                const coms = await ProductListContract.methods.getComment().call()
+                const contract = getProductContract(this.address)
+                const coms = await contract.methods.getComment().call()
                 //console.log(coms)
                 let ret = []
                 for(let i=0;i<coms.length;i+=2){
@@ -94,13 +98,15 @@
                 const hash1 = hash.slice(0,23)
                 const hash2 = hash.slice(23)
 
-                await ProductListContract.methods.createComment(
+                const contract = getProductContract(this.address)
+                await contract.methods.createComment(
                     web3.utils.asciiToHex(hash1),
-                    web3.utils.asciiToHex(hash2)
-                ).send({
+                    web3.utils.asciiToHex(hash2))
+                    .send({
                     from:this.account,
-                    gas:'5000000'
+                    gas:'6000000'
                 })
+
                     this.content = ''
                 hide()
                 this.init()
@@ -113,7 +119,8 @@
                 const hash = await saveJsonOnIpfs(item)
                 const hash1 = web3.utils.asciiToHex(hash.slice(0,23))
                 const hash2 = web3.utils.asciiToHex(hash.slice(23))
-                await ProductListContract.methods.updateComment(this.ansIndex,hash1,hash2)
+                const contract = getProductContract(this.address)
+                await contract.methods.updateComment(this.ansIndex,hash1,hash2)
                     .send({
                         from:this.account,
                         gas:'5000000'

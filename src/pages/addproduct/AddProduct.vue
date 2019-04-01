@@ -64,6 +64,7 @@
                     this.img
                 ]
                 //web3.eth.defaultAccount = '0x0922c67570E23798922578Be9602FC4e4bCb947E'
+                window.web3.currentProvider.enable()
                 await ProductListContract.methods.createproduct(...arr)
                     .send({
                         from:account

@@ -3,34 +3,10 @@ pragma solidity ^0.4.24;
 contract ProductList{
   address public ceo;
   address[] public products;
-  bytes23[] public comments;
+
   constructor() public {
     ceo = msg.sender;
   }
-  // 新建
-  function createComment(bytes23 _hash1,bytes23 _hash2) public{
-    comments.push(_hash1);
-    comments.push(_hash2);
-  }
-  function getComment() public view returns(bytes23[]){
-    return comments;
-  }
-  // 更新 比如有回复的时候
-  function updateComment(uint _index, bytes23 _hash1, bytes23 _hash2) public{
-      comments[_index*2] = _hash1;
-      comments[_index*2+1] = _hash2;
-  }
-  function removeComment(uint _index) public{
-      uint index = _index*2;
-      uint len = comments.length;
-      for(uint i=index;i<len-2;i=i+2){
-        comments[i] = comments[i+2];
-        comments[i+1] = comments[i+3];
-     }
-      delete comments[len-1];
-      delete comments[len-2];
-      comments.length = comments.length-2;
- }
   function createproduct(string _name,string _content,uint _price,string _img) public{
     address newproduct = new Product(ceo,msg.sender, _name, _content, _price, _img);
     products.push(newproduct);
@@ -69,6 +45,7 @@ contract Product{
   string public video;
   //bool public isSpare;
   uint public count;
+  bytes23[] public comments;
   // 用户够买信息
   mapping(address=>uint) public users;
   constructor(address _ceo, address _owner,string _name,string _content,uint _price,string _img) public{
@@ -82,6 +59,31 @@ contract Product{
     count = 0;
     //isSpare = true;
   }
+    // 新建
+    function createComment(bytes23 _hash1,bytes23 _hash2) public{
+      comments.push(_hash1);
+      comments.push(_hash2);
+    }
+    function getComment() public view returns(bytes23[]){
+      return comments;
+    }
+    // 更新 比如有回复的时候
+    function updateComment(uint _index, bytes23 _hash1, bytes23 _hash2) public{
+        comments[_index*2] = _hash1;
+        comments[_index*2+1] = _hash2;
+    }
+    function removeComment(uint _index) public{
+        uint index = _index*2;
+        uint len = comments.length;
+        for(uint i=index;i<len-2;i=i+2){
+          comments[i] = comments[i+2];
+          comments[i+1] = comments[i+3];
+       }
+        delete comments[len-1];
+        delete comments[len-2];
+        comments.length = comments.length-2;
+   }
+
   function addVideo(string _video) public{
     require(msg.sender==owner);
     require(count > 0);
