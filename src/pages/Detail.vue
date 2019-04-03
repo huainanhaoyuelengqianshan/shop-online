@@ -17,11 +17,6 @@
                 <a-form-item  label="已购买人数">
                     {{count}}
                 </a-form-item>
-
-                <!--<a-form-item {...formItemLayout} label="状态">-->
-                    <!--{this.state.isOnline ? <Badge count="已上线"></Badge>-->
-                    <!--:<Badge count="众筹中"></Badge>}-->
-                <!--</a-form-item>-->
                 <a-form-item  label="身份">
                     <a-upload v-if="role == '0'" :beforeUpload="handleUpload" :showUploadList="false">
                         <a-button type='primary'>上传视频</a-button>
@@ -39,18 +34,18 @@
                 </a-form-item>
                 <a-form-item  label="购买">
                     <a-button v-if="role === '2'" type='primary' @click="buy">
-                        支持{{price}}ETH
+                        支付{{price}}ETH
                     </a-button>
                 </a-form-item>
             </a-form>
             </a-col>
         </a-row>
-        <com-ments></com-ments>
+        <com-ments :id="id"></com-ments>
     </div>
 </template>
 
 <script>
-    import { web3,getProductContract ,saveImageToIpfs,ipfsPrefix} from '../config'
+    import { web3,ProductListContract,saveImageToIpfs,ipfsPrefix} from '../config'
     import ComMents from './Comments'
     export default {
         name: "detail",
@@ -59,7 +54,7 @@
         },
         data(){
             return {
-                address: '',
+                id: 0,
                 showAll:true,
                 account:'',
                 name:'',
@@ -79,9 +74,9 @@
         methods:{
             async init(){
                 const [account] = await web3.eth.getAccounts()
-                this.address = this.$route.path.slice(8)
-                const contract = getProductContract(this.address)
-                const detail = await contract.methods.getDetail().call({from:account})
+                this.id = parseInt(this.$route.path.slice(8))
+                // const contract = getProductContract(this.address)
+                const detail = await ProductListContract.methods.getDetail(this.id).call({from:account})
                 let [name, content, price, img, video, count, role] = Object.values(detail)
                 this.account = account,
                 this.name = name,
@@ -93,9 +88,7 @@
                 this.price = web3.utils.fromWei(price)
             },
             buy: async function (){
-                const contract = getProductContract(this.address)
-                // const buyPrice = this.state.isOnline?this.state.price:this.state.fundingPrice
-                await contract.methods.buy()
+                await ProductListContract.methods.buy(this.id)()
                     .send({
                         from:this.account,
                         value: web3.utils.toWei(this.price),
@@ -105,8 +98,7 @@
             },
             handleUpload:async function(file){
                 const hash = await saveImageToIpfs(file)
-                const contract = getProductContract(this.address)
-                await contract.methods.addVideo(hash).send({
+                await ProductListContract.methods.addVideo(this.id,hash).send({
                     from:this.account,
                     gas:'6000000'
                 })

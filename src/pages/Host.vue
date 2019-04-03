@@ -33,7 +33,7 @@
 </template>
 
 <script>
-    import {ipfsPrefix,ProductListContract,web3} from '../../config'
+    import {ipfsPrefix,ProductListContract,web3} from '../config'
     export default {
         name: "host",
         data () {

@@ -2,42 +2,35 @@
     <div>
         <a-row justify='center' type='flex'>
             <a-col :span="20">
-            <div v-for="(item,index) of comments">
-                <a-comment
-                    :key="item.content"
-                    :content="item.content"
-                    avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
+                <div v-for="(item,index) of comments">
+                    <a-comment
+                            :key="item.content"
+                            :content="item.content"
+                            avatar="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png"
                     >
-                        <!--<div v-for="ans of item.answers">-->
-                        <!--<a-comment-->
-                                <!--:key=ans.text-->
-                                <!--:content=ans.text-->
-                        <!--&gt;-->
-                        <!--</a-comment>-->
-                        <!--</div>-->
-            </a-comment>
-            </div>
-            <a-form @submit="handleSubmit" style="marginTop:'20px'">
-                <a-form-item label='撰写评论'>
-                    <a-textarea
-                            rows="6"
-                            :value="content"
-                            name='content'
-                            v-model="content"></a-textarea >
-                </a-form-item>
-                <a-form-item>
-                    <a-button type='primary' html-type="submit">提交评论</a-button>
-                </a-form-item>
-            </a-form>
-            <a-modal
-                    title="回复"
-                    :visible="showModal"
-                    @ok="handleOk"
-                    @cancel="handleCancel"
-            >
-                <a-input value="answer" v-model="answer"></a-input>
+                    </a-comment>
+                </div>
+                <a-form @submit="handleSubmit" style="marginTop:'20px'">
+                    <a-form-item label='撰写评论'>
+                        <a-textarea
+                                rows="6"
+                                :value="content"
+                                name='content'
+                                v-model="content"></a-textarea >
+                    </a-form-item>
+                    <a-form-item>
+                        <a-button type='primary' html-type="submit">提交评论</a-button>
+                    </a-form-item>
+                </a-form>
+                <a-modal
+                        title="回复"
+                        :visible="showModal"
+                        @ok="handleOk"
+                        @cancel="handleCancel"
+                >
+                    <a-input value="answer" v-model="answer"></a-input>
 
-            </a-modal>
+                </a-modal>
 
             </a-col>
 
@@ -47,9 +40,12 @@
 
 <script>
     import {notification,message} from 'ant-design-vue'
-    import {web3,saveJsonOnIpfs,getProductContract,readJsonFromIpfs} from '../config'
+    import {web3,saveJsonOnIpfs,ProductListContract,readJsonFromIpfs} from '../config'
     export default {
         name: "comments",
+        props: {
+          id: Number
+        },
         data () {
             return {
                 ansIndex:0,
@@ -57,8 +53,7 @@
                 account:'',
                 answer:'',
                 showModal:false,
-                content:'',
-                address:''
+                content:''
             }
         },
         created () {
@@ -66,23 +61,22 @@
         },
         methods:{
             async init () {
-                window.web3.currentProvider.enable()
-                this.address = this.$route.path.slice(8)
                 let [account] = await web3.eth.getAccounts()
-                const contract = getProductContract(this.address)
-                const coms = await contract.methods.getComment().call()
-                //console.log(coms)
+                console.log("id"+this.id)
+                console.log("account"+account)
+                const coms = await ProductListContract.methods.getComment(this.id).call()
+                console.log("coms"+coms)
                 let ret = []
                 for(let i=0;i<coms.length;i+=2){
                     ret.push(readJsonFromIpfs(coms[i],coms[i+1]))
                 }
                 const comments = await Promise.all(ret)
-                //console.log(questions)
+
                 this.account = account
                 this.comments = comments
             },
             showInfoModal(i){
-                    this.ansIndex = i,
+                this.ansIndex = i,
                     this.showModal = true
             },
             handleSubmit: async function (e){
@@ -97,17 +91,16 @@
                 // 3. ipfs哈希上链
                 const hash1 = hash.slice(0,23)
                 const hash2 = hash.slice(23)
-
-                const contract = getProductContract(this.address)
-                await contract.methods.createComment(
+                window.web3.currentProvider.enable()
+                await ProductListContract.methods.createComment(
+                    this.id,
                     web3.utils.asciiToHex(hash1),
-                    web3.utils.asciiToHex(hash2))
-                    .send({
+                    web3.utils.asciiToHex(hash2)
+                ).send({
                     from:this.account,
-                    gas:'6000000'
+                    gas:'5000000'
                 })
-
-                    this.content = ''
+                this.content = ''
                 hide()
                 this.init()
             },
@@ -119,18 +112,17 @@
                 const hash = await saveJsonOnIpfs(item)
                 const hash1 = web3.utils.asciiToHex(hash.slice(0,23))
                 const hash2 = web3.utils.asciiToHex(hash.slice(23))
-                const contract = getProductContract(this.address)
-                await contract.methods.updateComment(this.ansIndex,hash1,hash2)
+                await ProductListContract.methods.updateComment(this.id,this.ansIndex,hash1,hash2)
                     .send({
                         from:this.account,
                         gas:'5000000'
                     })
                 this.init()
-                    this.showModal = false,
+                this.showModal = false,
                     this.answer = ''
             },
             handleCancel :function (e){
-                    this.showModal = false,
+                this.showModal = false,
                     this.answer = ''
             }
         }
@@ -138,5 +130,4 @@
 </script>
 
 <style scoped>
-
 </style>

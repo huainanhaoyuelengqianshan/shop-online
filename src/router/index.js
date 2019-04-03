@@ -19,6 +19,11 @@ export default new Router({
       path: '/detail/:address',
       name: 'Detail',
       component: () => import('@/pages/Detail')
+    },
+    {
+        path: '/host',
+        name: 'Host',
+        component: () => import('@/pages/Host')
     }
   ]
 })

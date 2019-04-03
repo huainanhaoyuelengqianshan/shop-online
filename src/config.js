@@ -4,7 +4,7 @@ import ipfsApi from 'ipfs-api'
 import {notification,message} from 'ant-design-vue'
 import Web3 from 'web3';
 import ProductList from '../src/compiled/ProductList.json'
-import Product from '../src/compiled/Product.json'
+//import Product from '../src/compiled/Product.json'
 import address from './address'
 let ipfs = ipfsApi("ipfs.infura.io","5001",{"protocol":"https"})
 
@@ -23,7 +23,7 @@ if(window.web3){
     // alert('请安装或者激活metamask')
 }
 let ProductListContract = new web3.eth.Contract(JSON.parse(ProductList.interface),address)
-let getProductContract = (addr) => new web3.eth.Contract(JSON.parse(Product.interface),addr)
+// let getProductContract = (addr) => new web3.eth.Contract(JSON.parse(Product.interface),addr)
 // 存储图片
 function saveImageToIpfs(file){
     const hide = message.loading('上传中')
@@ -64,7 +64,7 @@ export {
     saveImageToIpfs,
     web3,
     ProductListContract,
-    getProductContract,
+    // getProductContract,
     saveJsonOnIpfs,
     readJsonFromIpfs
 }

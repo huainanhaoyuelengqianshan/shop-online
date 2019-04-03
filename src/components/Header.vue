@@ -14,6 +14,9 @@
           <a-menu-item key="/add">
             <router-link to='/add'>添加商品</router-link>
           </a-menu-item>
+            <a-menu-item key="/host">
+                <router-link to='/host'>个人主页</router-link>
+            </a-menu-item>
         </a-menu>
     </div>
 </template>

@@ -27,6 +27,9 @@
                 <a-form-item label="上线价格">
                     <a-input name='price' v-model="price" />
                 </a-form-item>
+                <a-form-item label="库存量">
+                    <a-input name='count' v-model="count" />
+                </a-form-item>
                 <a-form-item>
                     <a-button type='primary' htmlType="submit">添加商品</a-button>
                 </a-form-item>
@@ -47,7 +50,8 @@
                 name:'',
                 content:'',
                 img:'',
-                price:''
+                price:'',
+                count:0
             }
         },
         methods:{
@@ -61,9 +65,9 @@
                     this.name,
                     this.content,
                     web3.utils.toWei(this.price),
-                    this.img
+                    this.img,
+                    this.count
                 ]
-                //web3.eth.defaultAccount = '0x0922c67570E23798922578Be9602FC4e4bCb947E'
                 window.web3.currentProvider.enable()
                 await ProductListContract.methods.createproduct(...arr)
                     .send({
