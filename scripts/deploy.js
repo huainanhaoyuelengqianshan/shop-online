@@ -10,7 +10,7 @@ const {interface, bytecode} = require(contractPath)
 
 const provider = new HDWalletProvider(
     "struggle area pull major luggage horn crop warrior giraffe clog aisle bomb",
-    "https://ropsten.infura.io/v3/d2d94c816c824c1fb951afff9ad61c8e"
+    "https://ropsten.infura.io/v3/9495a1fc05a34c16a1cfaea665601144"
 )
 const web3 = new Web3(provider);
 

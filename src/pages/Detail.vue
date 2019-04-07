@@ -14,7 +14,7 @@
                     {{price}} ETH
                 </a-form-item>
 
-                <a-form-item  label="已购买人数">
+                <a-form-item  label="可购买数量">
                     {{count}}
                 </a-form-item>
                 <a-form-item  label="身份">
@@ -32,9 +32,12 @@
                     等待商家上传
                 </div>
                 </a-form-item>
+                <a-form-item  label="购买数量">
+                    <a-input name='buycount' v-model="buycount" />
+                </a-form-item>
                 <a-form-item  label="购买">
                     <a-button v-if="role === '2'" type='primary' @click="buy">
-                        支付{{price}}ETH
+                        支付{{price*buycount}}ETH
                     </a-button>
                 </a-form-item>
             </a-form>
@@ -47,6 +50,7 @@
 <script>
     import { web3,ProductListContract,saveImageToIpfs,ipfsPrefix} from '../config'
     import ComMents from './Comments'
+    const BigNumber = require('bignumber.js')
     export default {
         name: "detail",
         components :{
@@ -54,6 +58,7 @@
         },
         data(){
             return {
+                buycount:0,
                 id: 0,
                 showAll:true,
                 account:'',
@@ -88,10 +93,14 @@
                 this.price = web3.utils.fromWei(price)
             },
             buy: async function (){
-                await ProductListContract.methods.buy(this.id)()
+                //console.log("this.buycount"+this.buycount)
+                // const bg = new BigNumber(web3.utils.toWei(this.price))
+                console.log("类别ID"+this.id)
+                window.web3.currentProvider.enable()
+                await ProductListContract.methods.buy(this.id,this.buycount)
                     .send({
                         from:this.account,
-                        value: web3.utils.toWei(this.price),
+                        value:new BigNumber(web3.utils.toWei(this.price)*this.buycount),
                         gas:'6000000'
                     })
                 this.init()

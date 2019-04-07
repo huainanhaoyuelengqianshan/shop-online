@@ -24,6 +24,16 @@ export default new Router({
         path: '/host',
         name: 'Host',
         component: () => import('@/pages/Host')
-    }
+    },
+    {
+        path: '/trade',
+        name: 'Trade',
+        component: () => import('@/pages/Trade')
+    },
+      {
+          path: '/host/detail/:address',
+          name: 'HostDetail',
+          component: () => import('@/pages/HostDetail')
+      },
   ]
 })

@@ -58,9 +58,6 @@
             handleSubmit: async function(e){
                 e.preventDefault()
                 const [account] = await web3.eth.getAccounts()
-                // const web3 = new Web3(window.web3.currentProvider);
-                // console.log(web3.eth.accounts)
-                //console.log(window.web3.eth.defaultAccount)
                 const arr = [
                     this.name,
                     this.content,
