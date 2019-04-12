@@ -58,12 +58,15 @@
             handleSubmit: async function(e){
                 e.preventDefault()
                 const [account] = await web3.eth.getAccounts()
+                let time = Date.now();
+                time = parseInt(time/1000/60/60);//先处理成小时
                 const arr = [
                     this.name,
                     this.content,
                     web3.utils.toWei(this.price),
                     this.img,
-                    this.count
+                    this.count,
+                    time
                 ]
                 window.web3.currentProvider.enable()
                 await ProductListContract.methods.createproduct(...arr)

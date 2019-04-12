@@ -22,7 +22,7 @@
                                 </router-link>
                             </a-button>
 
-                            <a-button v-if="isCeo" @click="remove(id[i])" type='primary' block>删除</a-button>
+                            <a-button v-if="isCeo" @click="remove(i)" type='primary' block>删除</a-button>
 
                         </div>
                     </div>

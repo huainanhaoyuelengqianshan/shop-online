@@ -37,10 +37,10 @@
                             <!--<a-col :span="6">-->
                                 <div>
                                     <div>曾经的使用者：{{pre_owner[i]}}</div>
-                                    <div>曾经的价格：{{pre_price[i]}} ETH</div>
+                                    <div>曾经的价格：{{pre_price[i]}}</div>
                                     <div>曾经的時間：{{time[i]}}</div>
                                     <div v-if="i+1<pre_owner.length">
-                                        使用时间：{{time[i+1]-time[i]}}小时
+                                        使用时间：{{time[i+1]-time[i]}}
                                     </div>
                                 </div>
                             <!--</a-col>-->
@@ -115,13 +115,15 @@
                 console.log("secInfo"+typeof(secInfo))
                 const [pre_owner, pre_price,time] = Object.values(secInfo)
                 this.pre_owner = pre_owner
-                //this.pre_price = web3.utils.fromWei(pre_price)
+                this.pre_price = pre_price
                 this.time = time
                 console.log("pre1"+pre_owner,"pre2"+pre_price,"pre3"+time)
-                for(let i =0 ;i<pre_price.length;i++){
-                    // this.pre_owner[i] = pre_owner[i]
-                    this.pre_price[i] = web3.utils.fromWei(pre_price[i])
-                }
+                // for(let i =0 ;i<pre_owner.length;i++){
+                //     // this.pre_owner[i] = pre_owner[i]
+                //     this.pre_price[i] = pre_price[i]
+                //     this.time[i] = time[i]
+                //     this.secInfo_l = this.secInfo_l + 1
+                // }
                 this.showAll = true
             },
             handleUpload: async function(file){

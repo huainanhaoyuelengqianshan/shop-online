@@ -13,16 +13,13 @@
                         <img class="item" :src="imgsrc[i]" alt=""/>
 
                         <div class="center">
-                            <p>
-                                已有{{count[i]}}人购买
-                            </p>
                             <a-button type='primary' block style="marginBottom:'10px'">
-                                <router-link :to="'/detail/'+idList[i]">
+                                <router-link :to="'/host/detail/'+idList[i]">
                                     查看详情
                                 </router-link>
                             </a-button>
 
-                            <a-button v-if="isCeo" @click="remove(id[i])" type='primary' block>删除</a-button>
+                            <a-button v-if="isCeo" @click="remove(i)" type='primary' block>删除</a-button>
 
                         </div>
                     </div>
@@ -48,8 +45,6 @@
                 content:'',
                 price:[],
                 img:[],
-                video:'',
-                count:[],
                 imgsrc:[]
             }
         },
@@ -62,14 +57,14 @@
                 const isCeo = await ProductListContract.methods.isCeo().call({
                     from:account
                 })
-                const idList = await ProductListContract.methods.getproduct().call({
+                const idList = await ProductListContract.methods.getSecProduct().call({
                     from:account
                 })
                 console.log("idList "+idList)
 
                 const detailList = await Promise.all(
                     idList.map(id=>{
-                        return ProductListContract.methods.getDetail(id).call({
+                        return ProductListContract.methods.getSecDetail(id).call({
                             from:account
                         })
                     })
@@ -83,17 +78,14 @@
                 //console.log("到底是啥"+detailList)
                 this.detailList.map((detail,i)=> {
                     // const id = this.idList[i]
-                    const [name, content, price, img, video, count, role] = Object.values(detail)
+                    const [name, content, price, img, productindex] = Object.values(detail)
                     // buyPrice = web3.utils.fromWei(price)
                     this.name[i] = name
                     this.content= content
                     this.price = price
                     this.img[i] = img
-                    this.video = video
-                    this.count[i] = count
-                    this.role = role
                     this.imgsrc[i] = `${ipfsPrefix}${this.img[i]}`
-                    this.id[i] = `/detail/${idList[i]}`
+                    this.id[i] = idList[i]
                 })
 
             },
@@ -101,7 +93,7 @@
                 this.showAll = v;
             },
             async remove(i){
-                await ProductListContract.methods.removeproduct(i)
+                await ProductListContract.methods.remove_sec_product(i)
                     .send({
                         from:this.account,
                         gas:"5000000"

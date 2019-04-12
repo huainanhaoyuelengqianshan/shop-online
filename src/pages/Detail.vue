@@ -97,7 +97,9 @@
                 // const bg = new BigNumber(web3.utils.toWei(this.price))
                 console.log("类别ID"+this.id)
                 window.web3.currentProvider.enable()
-                await ProductListContract.methods.buy(this.id,this.buycount)
+                let time = Date.now();
+                time = parseInt(time/1000/60/60);//先处理成小时
+                await ProductListContract.methods.buy(this.id,this.buycount,time)
                     .send({
                         from:this.account,
                         value:new BigNumber(web3.utils.toWei(this.price)*this.buycount),
