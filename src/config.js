@@ -4,10 +4,11 @@ import ipfsApi from 'ipfs-api'
 import {notification,message} from 'ant-design-vue'
 import Web3 from 'web3';
 import ProductList from '../src/compiled/ProductList.json'
+import user from '../src/compiled/user.json'
 //import Product from '../src/compiled/Product.json'
-import address from './address'
+import address_shop from './address_shop'
+import address_user from './address_user'
 let ipfs = ipfsApi("ipfs.infura.io","5001",{"protocol":"https"})
-
 
 // let ipfsPrefix = "https://ipfs.infura.io:5001/ipfs/"
 let ipfsPrefix = "https://ipfs.infura.io:5001/api/v0/cat?arg="
@@ -22,7 +23,8 @@ if(window.web3){
     })
     // alert('请安装或者激活metamask')
 }
-let ProductListContract = new web3.eth.Contract(JSON.parse(ProductList.interface),address)
+let ProductListContract = new web3.eth.Contract(JSON.parse(ProductList.interface),address_shop)
+let userContract = new web3.eth.Contract(JSON.parse(user.interface),address_user)
 // let getProductContract = (addr) => new web3.eth.Contract(JSON.parse(Product.interface),addr)
 // 存储图片
 function saveImageToIpfs(file){
@@ -64,7 +66,7 @@ export {
     saveImageToIpfs,
     web3,
     ProductListContract,
-    // getProductContract,
+    userContract,
     saveJsonOnIpfs,
     readJsonFromIpfs
 }
