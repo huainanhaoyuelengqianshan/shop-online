@@ -2,9 +2,10 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
+//路由跳转之前
 
-export default new Router({
-  routes: [
+// export default new Router({
+  const routes = [
     {
       path: '/',
       name: 'ProductList',
@@ -36,4 +37,17 @@ export default new Router({
           component: () => import('@/pages/HostDetail')
       },
   ]
-})
+// })
+const RouterConfig = {
+    // 使用 HTML5 的 History 路由模式
+    mode: 'history',
+    routes: routes
+};
+const router = new Router(RouterConfig);
+router.beforeEach((to, from, next) => {
+    if (to.path !== '/'&& to.path !== '/trade' && !localStorage.token) {
+        return next('/')
+    }
+    next()
+});
+export default router

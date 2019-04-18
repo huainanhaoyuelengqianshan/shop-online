@@ -69,10 +69,12 @@
                     time
                 ]
                 window.web3.currentProvider.enable()
+                const hide = message.loading('商品信息上链中',0)
                 await ProductListContract.methods.createproduct(...arr)
                     .send({
                         from:account
                     })
+                hide()
                this.toindex = true
             },
             handleUpload: async function(file){
