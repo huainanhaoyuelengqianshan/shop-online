@@ -13,12 +13,15 @@
                     <a-form-item  label="新品价格">
                         {{price}} ETH
                     </a-form-item>
-                    <a-form-item  label="身份">
+                    <a-form-item  label="二手卖家图片">
+                        <img class="item" :src="sec_img" alt=""/>
+                    </a-form-item>
+                    <a-form-item  v-if="role === '0'" label="身份">
                         <a-upload  :beforeUpload="handleUpload" :showUploadList="false">
                             <a-button type='primary'>上传图片</a-button>
                         </a-upload>
                     </a-form-item>
-                    <a-form-item  label="卖出价格">
+                    <a-form-item  v-if="role === '0'" label="卖出价格">
                         <a-input name='sell_price' v-model="sell_price" />
                     </a-form-item>
                     <a-form-item>
@@ -38,7 +41,7 @@
                                 <div>
                                     <div>曾经的使用者：{{pre_owner[i]}}</div>
                                     <div>曾经的价格：{{pre_price[i]}} ETH</div>
-                                    <div>曾经的時間：{{time[i]}}</div>
+                                    <div>曾经的时间：{{time[i]}}</div>
                                     <div v-if="i+1<pre_owner.length">
                                         使用时间：{{time[i+1]-time[i]}}小时
                                     </div>
@@ -54,6 +57,7 @@
 
 <script>
     import { web3,ProductListContract,saveImageToIpfs,ipfsPrefix} from '../config'
+    import {notification,message} from 'ant-design-vue'
     // const BigNumber = require('bignumber.js')
     export default {
         name: "hostdetail",
@@ -65,6 +69,7 @@
                 name:'',
                 content:'',
                 img:'',
+                sec_img:'',
                 price:0,
                 sell_price:0,
                 role:0,
@@ -88,11 +93,13 @@
                 const detail = await ProductListContract.methods.getSecDetail(this.id).call({from:account})
                 console.log("detail"+detail)
                 let [name,content,price,img,role] = Object.values(detail)
-                this.account = account,
-                    this.name = name,
-                    this.content = content,
-                    this.role = role;
-                    this.price = web3.utils.fromWei(price)
+                this.account = account
+                this.sec_img = `${ipfsPrefix}${img}`
+                this.name = name
+                this.content = content
+                this.role = role
+                console.log("role"+this.role)
+                this.price = web3.utils.fromWei(price)
             },
             sec_buy: async function (){
                 //console.log("this.buycount"+this.buycount)
@@ -101,12 +108,14 @@
                 window.web3.currentProvider.enable()
                 let time = Date.now();
                 time = parseInt(time/1000/60/60);//先处理成小时
+                const hide = message.loading('交易信息正在上链',0)
                 await ProductListContract.methods.sec_buy(this.id,time)
                     .send({
                         from:this.account,
                         value:web3.utils.toWei(this.price),
                         gas:'6000000'
                     })
+                hide()
                 this.init()
             },
             getInformation:async function(){
@@ -133,11 +142,13 @@
                 e.preventDefault()
                 window.web3.currentProvider.enable()
                 let sell_price = web3.utils.toWei(this.sell_price)
+                const hide = message.loading('正在售出',0)
                 await ProductListContract.methods.sec_sell(this.id,sell_price,this.img)
                     .send({
                         from:this.account,
                         gas:'6000000'
                     })
+                hide()
                 this.init()
             }
         },

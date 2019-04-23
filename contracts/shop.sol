@@ -12,7 +12,7 @@ contract ProductList{
   uint[] public p_price;
   uint[] public p_time;
   mapping (uint => address) public ProductToOwner;//商品类编号-持有者地址映射
-  mapping (uint => address) public producttoowner;//商品编号-持有者地址映射
+//  mapping (uint => address) public producttoowner;//商品编号-持有者地址映射
   mapping (address => uint) ownerProductCount;//持有者-拥有商品类数量映射
 
   constructor() public {
@@ -79,7 +79,7 @@ contract ProductList{
         sec_products[id].time.push(_time);
         sec_products[id].pre_price.push(0);
         sec_products[id].pre_price.push(c_price);
-        producttoowner[ID] = msg.sender;
+//        producttoowner[ID] = msg.sender;
         Productids.push(ID);
         id = id + 1;
         ownerProductCount[msg.sender]++;
@@ -103,19 +103,17 @@ contract ProductList{
       // 分成
       ceo.transfer(value/100);
       sec_products[_id].owner.transfer(value-value/100);
+      //标记为售出，从二手市场移除
       sec_products[_id].sell = false;
-      producttoowner[_id] = msg.sender;
+      //商品所属标记更改
+      sec_products[_id].owner = msg.sender;
+//      //全部商品标号与所属对应关系
+//      producttoowner[_id] = msg.sender;
       ownerProductCount[msg.sender]++;
       uint pr_price = sec_products[_id].price;
       sec_products[_id].pre_owner.push(msg.sender);
       sec_products[_id].pre_price.push(pr_price);
       sec_products[_id].time.push(_time);
-      //      for(uint i=0;i<sec_products.length;i++){
-      //        if(sec_products[i].productIndex != sec_products[_id].productIndex){
-      //
-      //          break;
-      //        }
-      //      }
     } else {
       msg.sender.transfer(msg.value);
     }
@@ -251,11 +249,12 @@ contract ProductList{
     uint[] memory result = new uint[](result_count);
     uint counter = 0;
     for (uint i = 0; i < sec_products.length; i++) {
-      if (producttoowner[i] == msg.sender) {
+      if (sec_products[i].owner == msg.sender) {
         result[counter] = i;
         counter++;
       }
     }
     return result;
   }
+
 }

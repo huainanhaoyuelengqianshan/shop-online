@@ -1,5 +1,8 @@
 <template>
     <div>
+        <div>
+            <host-info></host-info>
+        </div>
         <a-row style="marginTop:'30px'" :gutter="16">
             <a-col :span="20">
                 <a-switch @change='onChangeSwitch' checkedChildren="全部" unCheckedChildren="已上线" defaultChecked></a-switch>
@@ -31,8 +34,12 @@
 
 <script>
     import {ipfsPrefix,ProductListContract,web3} from '../config'
+    import HostInfo from './HostInfo'
     export default {
         name: "host",
+        components :{
+            HostInfo
+        },
         data () {
             return {
                 detailList:[],

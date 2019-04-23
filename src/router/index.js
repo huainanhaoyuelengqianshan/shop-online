@@ -32,6 +32,11 @@ Vue.use(Router)
         component: () => import('@/pages/Trade')
     },
       {
+          path: '/recommend',
+          name: 'Recommend',
+          component: () => import('@/pages/Recommend')
+      },
+      {
           path: '/host/detail/:address',
           name: 'HostDetail',
           component: () => import('@/pages/HostDetail')

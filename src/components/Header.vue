@@ -20,6 +20,9 @@
             <a-menu-item key="/trade">
                 <router-link to='/trade'>二手市场</router-link>
             </a-menu-item>
+            <a-menu-item key="/recommend">
+                <router-link to='/recommend'>智能推荐</router-link>
+            </a-menu-item>
             <a-menu-item>
                 <a-button  @click="handleStart" v-if="flag===''"> 开始
                 </a-button>
@@ -31,10 +34,9 @@
         </a-menu>
         <a-modal
                 v-model="modal_visible"
-                title="MetaMask一键登录"
+                title="账户注册"
                 onOk="handleOk"
                 centered
-                width：400
         >
             <template slot="footer">
                 <a-button key="back" @click="handleCancel">取消</a-button>
@@ -52,6 +54,7 @@
 </template>
 
 <script>
+import {notification,message} from 'ant-design-vue'
 import { web3,userContract,saveImageToIpfs,ipfsPrefix} from '../config'
 export default {
   name: 'Header',
@@ -65,14 +68,31 @@ export default {
         signature:"",
         msg:'',
         username:"",
-        img:"",
         userName:"",
         modal_visible:false,
-        storage_token:''
+        storage_token:'',
+        index:-1,
+        judgeAddress:false
         // defaultSelectedKeys: this.props.location.pathname
     }
   },
     computed:{
+        account: async function(){
+            var account_test = await new Promise(resolve => {
+                setTimeout(async() => {
+                  resolve("async await test...");
+                  await web3.eth.getAccounts()
+               }, 1000);
+            });
+            console.log(account_test)
+            // setInterval (async function(){
+            //     const [account] = await web3.eth.getAccounts()
+            //     account_test = account
+            //     console.log("account"+account)},1000
+            // )
+            // console.log("account_test"+account_test)
+            return account_test
+        },
         // this.username = localStorage.token
         flag:function(){
             var flag = this.username
@@ -83,8 +103,25 @@ export default {
       this.username = localStorage.token
     },
     methods:{
-        handleStart:function(){
-            this.modal_visible = true
+        handleStart:async function(){
+            if (!window.web3) {//4 先检查是否安装了metamask
+                window.alert('请先安装MetaMask插件');
+                return;
+            }
+            const [account] = await web3.eth.getAccounts()
+            this.account = account
+            this.judgeAddress = await userContract.methods.isExitUserAddress().call({
+                from:account
+            })
+            console.log("judgeAddress:"+this.judgeAddress)
+            if(this.judgeAddress === true){
+                this.handleSignMessage()
+                // this.handleAuthenticate()
+            } else {
+                this.modal_visible = true
+                // this.handleSignup()
+                // this.handleSignMessage()
+            }
         },
         handleCancel() {
             this.modal_visible = false
@@ -95,52 +132,29 @@ export default {
                 this.modal_visible = false;
                 this.loading = false;
             }, 2000);
-            this.handleClick()
+            this.handleSignup()
         },
-        handleClick:async function() {//3
-            const onLoggedIn  = this.$route.path;//React中的每一个组件，都包含有一个属性（props），属性主要是从父组件传递给子组件的，在组件内部，我们可以通过this.props获取属性对象
-            //就是点击页面按钮时传来的属性对象
-            if (!window.web3) {//4 先检查是否安装了metamask
-                window.alert('请先安装MetaMask插件');
-                return;
-            }
-            // if (!web3) {//5 检查metamask是否连接上了网络
-            //     web3 = new Web3(window.web3.currentProvider);
-            // }
-            // if (!web3.eth.coinbase) {//6 检查metamask是否登录
-            //     window.alert('请先在MetaMask中激活');
-            //     return;
-            // }
+        handleSignup :async function() {
             await web3.currentProvider.enable()
             const [account] = await web3.eth.getAccounts()
             this.account = account
-            this.loading = true //到这里metamask就连接上了，状态为true
-            //Look if user with current publicAddress is already present on backend
-            let judgeAddress = await userContract.methods.isExitUserAddress().call({
+            const hide = message.loading('正在注册，请稍等',0)
+            this.index = await userContract.methods.createUser(this.userName).send({
                 from:account
             })
-            this.nonce = await userContract.methods.createRand().call({
-                from:account
-            })
-            if(judgeAddress === true){
-                this.handleSignMessage()
-                // this.handleAuthenticate()
-            } else {
-                this.handleSignup()
-                this.handleSignMessage()
-                // this.handleAuthenticate()
-            }
-        },
-        handleSignup :async function() {
-            const [account] = await web3.eth.getAccounts()
-            this.index = await userContract.methods.createUser(this.username,this.img).call({
-                from:account
-            })
-            //console.log(this.index)
+            hide()
+            console.log("this.index:"+this.index)
+            this.handleSignMessage()
         },
         handleSignMessage :async function() {
             const [account] = await web3.eth.getAccounts()
-            console.log("account: "+account)
+            this.account = account
+            this.nonce = await userContract.methods.createRand().call({
+                from:account
+            })
+            const userInfo = await userContract.methods.findUser().call({from:account})
+            let [userAddress, username, time, index,img] = Object.values(userInfo)
+            console.log("userAddress: "+userAddress)
             this.msg = web3.utils.fromUtf8(`我正在使用MeatMask进行身份确认: ${this.nonce}`)
             this.signature = await web3.eth.personal.sign(
                 this.msg,
@@ -149,9 +163,9 @@ export default {
             console.log("this.signature :"+this.signature)
             const address_test = await web3.eth.personal.ecRecover(this.msg, this.signature)
             console.log("address_test: "+address_test)
-            if(address_test === account.toLowerCase()){
+            if(address_test === userAddress.toLowerCase()){
                 console.log("true")
-                this.username = this.userName
+                this.username = username
                 localStorage.token = this.username
                 setTimeout(() => {
                     this.useruame = '';

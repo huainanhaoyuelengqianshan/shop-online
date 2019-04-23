@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 contract user {
+//    string public empty;
     //定义用户数据结构
     struct UserStruct {
         address userAddress;
@@ -38,21 +39,25 @@ contract user {
     }
     //根据用户名查找对于的address
     function findUserAddressByUsername(string _username) public constant returns (address) {
-        require(isExitUsername(_username));
+//        require(isExitUsername(_username));
         return userListStruct[_username].userAddress;
     }
     //创建用户信息
-    function createUser(string _username,string _img) public returns (uint) {
+    function createUser(string _username) public returns (uint) {
         require(!isExitUserAddress()); //如果地址已存在则不允许再创建
         userAddresses.push(msg.sender); //地址集合push新地址
-        userStruct[msg.sender] = UserStruct(msg.sender, _username, now, userAddresses.length - 1,_img);
+        userStruct[msg.sender] = UserStruct(msg.sender, _username, now, userAddresses.length - 1,'');
         usernames.push(_username); //用户名集合push新用户
         userListStruct[_username] = UserListStruct(msg.sender, usernames.length - 1); //用户所对应的地址集合
         return userAddresses.length - 1;
     }
+    function updateUser(string _img) public {
+//        require(isExitUserAddress());
+        userStruct[msg.sender].img = _img;
+    }
     //获取用户个人信息
     function findUser() public constant returns (address, string, uint, uint,string) {
-        require(isExitUserAddress());
+//        require(isExitUserAddress());
         return (
         userStruct[msg.sender].userAddress,
         userStruct[msg.sender].username,
@@ -66,36 +71,4 @@ contract user {
 //        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, hash));
 //        return ecrecover(prefixedHash, v, r, s);
 //    }
-    function ecrecovery(bytes32 hash, bytes sig) public pure returns (address) {
-        bytes32 r;
-        bytes32 s;
-        uint8 v;
-
-        if (sig.length != 65) {
-            return 0;
-        }
-
-        assembly {
-            r := mload(add(sig, 32))
-            s := mload(add(sig, 64))
-            v := and(mload(add(sig, 65)), 255)
-        }
-
-        // https://github.com/ethereum/go-ethereum/issues/2053
-        if (v < 27) {
-            v += 27;
-        }
-
-        if (v != 27 && v != 28) {
-            return 0;
-        }
-
-        /* prefix might be needed for geth only
-         * https://github.com/ethereum/go-ethereum/issues/3731
-         */
-        //        bytes memory prefix = "\x19Ethereum Signed Message:\n32";
-        //        hash = keccak256(abi.encodePacked(prefix, hash));
-
-        return ecrecover(hash, v, r, s);
-    }
 }

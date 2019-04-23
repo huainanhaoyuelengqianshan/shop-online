@@ -14,7 +14,7 @@
 
                         <div class="center">
                             <p>
-                                已有{{count[i]}}人购买
+                                剩余{{count[i]}}件
                             </p>
                             <a-button type='primary' block style="marginBottom:'10px'">
                                 <router-link :to="'/detail/'+idList[i]">
@@ -93,6 +93,7 @@
                     this.count[i] = count
                     this.role = role
                     this.imgsrc[i] = `${ipfsPrefix}${this.img[i]}`
+                    console.log("图片地址"+this.imgsrc[i])
                     this.id[i] = `/detail/${idList[i]}`
                 })
 

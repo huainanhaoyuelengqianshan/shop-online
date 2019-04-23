@@ -49,6 +49,7 @@
 
 <script>
     import { web3,ProductListContract,saveImageToIpfs,ipfsPrefix} from '../config'
+    import {notification,message} from 'ant-design-vue'
     import ComMents from './Comments'
     const BigNumber = require('bignumber.js')
     export default {
@@ -96,15 +97,17 @@
                 //console.log("this.buycount"+this.buycount)
                 // const bg = new BigNumber(web3.utils.toWei(this.price))
                 console.log("类别ID"+this.id)
-                window.web3.currentProvider.enable()
+                await web3.currentProvider.enable()
                 let time = Date.now();
                 time = parseInt(time/1000/60/60);//先处理成小时
+                const hide = message.loading('交易上链中',0)
                 await ProductListContract.methods.buy(this.id,this.buycount,time)
                     .send({
                         from:this.account,
                         value:new BigNumber(web3.utils.toWei(this.price)*this.buycount),
                         gas:'6000000'
                     })
+                hide()
                 this.init()
             },
             handleUpload:async function(file){
