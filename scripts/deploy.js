@@ -24,7 +24,6 @@ const web3 = new Web3(provider);
     console.log('合约部署的账号：', accounts[0])
     // await
     console.time('合约部署消耗时间')
-    console.log(typeof (interface))
     const result_shop = await new web3.eth.Contract(JSON.parse(interface_shop))
         .deploy({data: bytecode_shop})
         .send({
@@ -51,4 +50,10 @@ const web3 = new Web3(provider);
     fs.writeFileSync(addressFile_user, "export default "+JSON.stringify(contractAddress_user))
     console.log("地址写入成功",addressFile_shop)
     console.log("地址写入成功",addressFile_user)
+    // console.time('商品部署消耗时间')
+    // var file=path.resolve(__dirname, './jiadian.json')
+    // var result=JSON.parse(fs.readFileSync(file))
+    // console.log(result)
+    // console.timeEnd('商品部署消耗时间')
 })()
+

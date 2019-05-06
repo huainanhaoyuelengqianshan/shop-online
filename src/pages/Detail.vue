@@ -97,6 +97,17 @@
                 //console.log("this.buycount"+this.buycount)
                 // const bg = new BigNumber(web3.utils.toWei(this.price))
                 console.log("类别ID"+this.id)
+                fetch("http://155.138.165.114:3001/users/user_data",{
+                    method:'POST',
+                    headers:{
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body:JSON.stringify({
+                        account:this.account,
+                        id:this.id
+                    })
+                })
                 await web3.currentProvider.enable()
                 let time = Date.now();
                 time = parseInt(time/1000/60/60);//先处理成小时
@@ -108,6 +119,16 @@
                         gas:'6000000'
                     })
                 hide()
+                //前端购物数据保存到后端
+
+                    // .then(res => res.json())
+                    // .then(data => {
+                    //     console.log(data)
+                    // })
+                    // .catch(function (e) {
+                    //     console.log('oops! error:', e.message)
+                    // })
+
                 this.init()
             },
             handleUpload:async function(file){

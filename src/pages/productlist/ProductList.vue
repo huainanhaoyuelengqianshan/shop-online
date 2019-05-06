@@ -33,6 +33,7 @@
 </template>
 
 <script>
+    import axios from 'axios'
     import {ipfsPrefix,ProductListContract,web3} from '../../config'
     export default {
         name: "host",

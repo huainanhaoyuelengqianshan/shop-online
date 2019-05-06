@@ -30,6 +30,9 @@
                 <a-form-item label="库存量">
                     <a-input name='count' v-model="count" />
                 </a-form-item>
+                <a-form-item label="商品属性（1代表家电，2代表零食，3代表美妆，4代表鞋靴，5代表衣服">
+                    <a-input name='tag' v-model="tag" />
+                </a-form-item>
                 <a-form-item>
                     <a-button type='primary' htmlType="submit">添加商品</a-button>
                 </a-form-item>
@@ -51,7 +54,8 @@
                 content:'',
                 img:'',
                 price:'',
-                count:0
+                count:0,
+                tag:0
             }
         },
         methods:{
@@ -66,7 +70,8 @@
                     web3.utils.toWei(this.price),
                     this.img,
                     this.count,
-                    time
+                    time,
+                    this.tag
                 ]
                 window.web3.currentProvider.enable()
                 const hide = message.loading('商品信息上链中',0)

@@ -9,12 +9,14 @@ contract user {
         uint time;
         uint index;
         string img;
+        uint[5] predict;
     }
     //定义用户列表数据结构
     struct UserListStruct {
         address userAddress;
         uint index;
     }
+    uint[5] public init = [0,0,0,0,0];
     uint randNonce = 0;
     address[] public userAddresses; //所有地址集合
     string[] private usernames; //所有用户名集合
@@ -46,7 +48,7 @@ contract user {
     function createUser(string _username) public returns (uint) {
         require(!isExitUserAddress()); //如果地址已存在则不允许再创建
         userAddresses.push(msg.sender); //地址集合push新地址
-        userStruct[msg.sender] = UserStruct(msg.sender, _username, now, userAddresses.length - 1,'');
+        userStruct[msg.sender] = UserStruct(msg.sender, _username, now, userAddresses.length - 1,'',init);
         usernames.push(_username); //用户名集合push新用户
         userListStruct[_username] = UserListStruct(msg.sender, usernames.length - 1); //用户所对应的地址集合
         return userAddresses.length - 1;
@@ -65,6 +67,11 @@ contract user {
         userStruct[msg.sender].index,
         userStruct[msg.sender].img
         );
+    }
+    function getPredict() public view returns(uint[5]){
+        return (
+            userStruct[msg.sender].predict
+    );
     }
 //    function verify( string hash, uint8 v, bytes32 r, bytes32 s) pure public returns(address) {
 //

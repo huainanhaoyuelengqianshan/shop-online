@@ -48,7 +48,7 @@
                 imgsrc:[]
             }
         },
-        created () {
+        mounted () {
             this.init()
         },
         methods: {
@@ -69,7 +69,7 @@
                         })
                     })
                 )
-                //console.log("detail" + detailList)
+                console.log("detailList:" + detailList)
                 this.detailList = detailList
                 this.idList = idList
                 this.account = account
@@ -78,13 +78,15 @@
                 //console.log("到底是啥"+detailList)
                 this.detailList.map((detail,i)=> {
                     // const id = this.idList[i]
-                    const [name, content, price, img, productindex] = Object.values(detail)
+                    const [name, content, price, img, role,productindex] = Object.values(detail)
                     // buyPrice = web3.utils.fromWei(price)
                     this.name[i] = name
                     this.content= content
                     this.price = price
                     this.img[i] = img
+                    console.log("price："+price)
                     this.imgsrc[i] = `${ipfsPrefix}${this.img[i]}`
+                    //console.log("imgsrc："+this.imgsrc[i])
                     this.id[i] = idList[i]
                 })
 

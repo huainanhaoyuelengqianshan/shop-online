@@ -34,6 +34,7 @@ contract ProductList{
     uint count;
     bytes23[] comments;
     uint time;
+    uint tag;
     // 用户够买信息
     // mapping(address=>uint) users;
   }
@@ -47,12 +48,13 @@ contract ProductList{
     address[] pre_owner;
     uint[] pre_price;
     uint[] time;
+    uint tag;
   }
   Product[] public products;
   sec_Product[] public sec_products;
   //商家添加商品
-  function createproduct(string _name,string _content,uint _price,string _img,uint _count,uint _time) public{
-    uint ID = products.push(Product(productIndex,msg.sender,_name, _content, _price, _img,'',_count,empty,_time)) - 1;
+  function createproduct(string _name,string _content,uint _price,string _img,uint _count,uint _time,uint _tag) public{
+    uint ID = products.push(Product(productIndex,msg.sender,_name, _content, _price, _img,'',_count,empty,_time,_tag)) - 1;
     ProductToOwner[ID] = msg.sender;
     productsids.push(ID);
     //ownerProductCount[msg.sender]++;
@@ -69,7 +71,7 @@ contract ProductList{
       // 统计商品数量
       products[_productIndex].count = products[_productIndex].count - _count;
       for(uint i = 0; i < _count; i++) {
-        uint ID = sec_products.push(sec_Product(_productIndex,id,msg.sender,products[_productIndex].price,products[_productIndex].img,false,p_owner,p_price,p_time)) - 1;
+        uint ID = sec_products.push(sec_Product(_productIndex,id,msg.sender,products[_productIndex].price,products[_productIndex].img,false,p_owner,p_price,p_time,products[_productIndex].tag)) - 1;
         address c_owner = products[sec_products[id].productIndex].owner;
         uint c_time = products[sec_products[id].productIndex].time;
         uint c_price = products[sec_products[id].productIndex].price;
@@ -134,7 +136,7 @@ contract ProductList{
     return result;
   }
   // 获取二手商品详情
-  function getSecDetail(uint _id) public view returns(string, string,uint,string,uint){
+  function getSecDetail(uint _id) public view returns(string, string,uint,string,uint,uint){
     uint role;
     if(sec_products[_id].owner==msg.sender){
       role = 0; //卖家自己
@@ -146,11 +148,12 @@ contract ProductList{
     products[productindex].name,
     products[productindex].content,
     sec_products[_id].price,
-    sec_products[_id].img,
-    role
+    products[productindex].img,
+    role,
+    sec_products[_id].tag
     );
   }
-  function getSecInfo(uint _id) public view returns(address[],uint[],uint[]){
+  function getSecInfo(uint _id) public view returns(address[],uint[],uint[]){//溯源使用
     return (
     sec_products[_id].pre_owner,
     sec_products[_id].pre_price,
