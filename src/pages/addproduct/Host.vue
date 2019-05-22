@@ -17,7 +17,7 @@
 
                         <div class="center">
                             <a-button type='primary' block style="marginBottom:'10px'">
-                                <router-link  :to="'/host/detail/'+idlist[i]">
+                                <router-link v-on:click.native="transid(i)" :to="'/host/detail/'+idList[i]">
                                     查看详情
                                 </router-link>
                             </a-button>
@@ -52,8 +52,7 @@
                 content:'',
                 price:[],
                 img:[],
-                imgsrc:[],
-                idlist:[]
+                imgsrc:[]
             }
         },
         created () {
@@ -75,19 +74,9 @@
                 const idList = await ProductListContract.methods.getProductsByOwner().call({
                     from:this.$store.state.currentaccount
                 })
-                console.log("当前地址："+this.$store.state.currentaccount)
                 console.log("商品序列："+idList)
-                var idlist = []
-                for(var i=0;i<idList.length;i++){
-                    if(idList[i]!=='0'){
-                        var number_test = parseInt(idList[i])-1
-                        idlist.push(number_test.toString())
-                    }
-                }
-                console.log("更改后序列："+idlist)
-                this.idlist = idlist
                 const detailList = await Promise.all(
-                    idlist.map(id=>{
+                    idList.map(id=>{
                         return ProductListContract.methods.getSecDetail(id).call({
                             from:this.$store.state.currentaccount
                         })
@@ -102,7 +91,6 @@
                     const [name,content,price,img,productindex] = Object.values(detail)
                     // buyPrice = web3.utils.fromWei(price)
                     this.name[i] = name
-                    console.log("this.name"+i+":"+this.name[i])
                     this.content= content
                     this.price[i] = price
                     this.img[i] = img
@@ -110,6 +98,9 @@
                     //this.id[i] = `/detail/${idList[i]}`
                 })
 
+            },
+            transid:function(i){
+                eventBus.$emit('id_trans', this.idList[i])
             },
             onChangeSwitch:function(v){
                 this.showAll = v;

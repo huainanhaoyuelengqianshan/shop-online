@@ -33,7 +33,7 @@
 </template>
 
 <script>
-    import axios from 'axios'
+
     import {ipfsPrefix,ProductListContract,web3} from '../../config'
     export default {
         name: "host",
@@ -66,7 +66,7 @@
                 const idList = await ProductListContract.methods.getproduct().call({
                     from:account
                 })
-                console.log("idList "+idList)
+                console.log("类别序号："+idList)
 
                 const detailList = await Promise.all(
                     idList.map(id=>{

@@ -14,7 +14,7 @@
 
                         <div class="center">
                             <a-button type='primary' block style="marginBottom:'10px'">
-                                <router-link :to="'/host/detail/'+idList[i]">
+                                <router-link :to="'/trade/detail/'+idlist[i]">
                                     查看详情
                                 </router-link>
                             </a-button>
@@ -31,6 +31,7 @@
 
 <script>
     import {ipfsPrefix,ProductListContract,web3} from '../config'
+    import eventBus  from './eventBus.js'
     export default {
         name: "trade",
         data () {
@@ -38,41 +39,58 @@
                 detailList:[],
                 idList:[],
                 id:[],
-                account:'',
                 isCeo:false,
                 showAll:true,
                 name:[],
                 content:'',
                 price:[],
                 img:[],
-                imgsrc:[]
+                imgsrc:[],
+                idlist:[]
             }
         },
         mounted () {
             this.init()
         },
+        computed: {
+            getAccount() {
+                return this.$store.state.currentaccount;
+            }
+        },
+        watch: {
+            getAccount(val) {
+                this.init()
+            }
+        },
         methods: {
             async init() {
-                const [account] = await web3.eth.getAccounts()
+                // const [account] = await web3.eth.getAccounts()
                 const isCeo = await ProductListContract.methods.isCeo().call({
-                    from:account
+                    from:this.$store.state.currentaccount
                 })
                 const idList = await ProductListContract.methods.getSecProduct().call({
-                    from:account
+                    from:this.$store.state.currentaccount
                 })
-                console.log("idList "+idList)
-
+                console.log("商品序号： "+idList)
+                var idlist = []
+                for(var i=0;i<idList.length;i++){
+                    if(idList[i]!=='0'){
+                        var number_test = parseInt(idList[i])-1
+                        idlist.push(number_test.toString())
+                    }
+                }
+                this.idlist = idlist
                 const detailList = await Promise.all(
-                    idList.map(id=>{
+                    idlist.map(id=>{
                         return ProductListContract.methods.getSecDetail(id).call({
-                            from:account
+                            from:this.$store.state.currentaccount
                         })
                     })
                 )
                 console.log("detailList:" + detailList)
                 this.detailList = detailList
                 this.idList = idList
-                this.account = account
+                // this.account = account
                 this.isCeo = isCeo
 
                 //console.log("到底是啥"+detailList)
@@ -97,7 +115,7 @@
             async remove(i){
                 await ProductListContract.methods.remove_sec_product(i)
                     .send({
-                        from:this.account,
+                        from:this.$store.state.currentaccount,
                         gas:"5000000"
                     })
                 this.init()

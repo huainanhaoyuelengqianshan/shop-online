@@ -64,7 +64,6 @@
                 recommendList2:[],
                 name:[],
                 tag:[],
-                account:'',
                 similar_id:[],
                 content:'',
                 price:[],
@@ -72,7 +71,8 @@
                 video:'',
                 count:[],
                 imgsrc:[],
-                idList2:[]
+                idList2:[],
+                idlist:[]
             }
         },
         mounted() {
@@ -84,24 +84,33 @@
         },
         methods:{
             async init(){
-                const [account] = await web3.eth.getAccounts()
-                this.account = account
+                // const [account] = await web3.eth.getAccounts()
+                // this.account = account
                 const idList = await ProductListContract.methods.getProductsByOwner().call({
-                    from:account
+                    from:this.$store.state.currentaccount
                 })
+                var idlist = []
+                for(var i=0;i<idList.length;i++){
+                    if(idList[i]!=='0'){
+                        var number_test = parseInt(idList[i])-1
+                        idlist.push(number_test.toString())
+                    }
+                }
+                console.log("更改后序列："+idlist)
+                this.idlist = idlist
                 const detailList = await Promise.all(
-                    idList.map(id=>{
+                    idlist.map(id=>{
                         return ProductListContract.methods.getSecDetail(id).call({
-                            from:account
+                            from:this.$store.state.currentaccount
                         })
                     })
                 )
                 // this.detailList = detailList
                 detailList.map((detail,i)=> {
                     const [name,content,price,img,productindex,tag] = Object.values(detail)
-                    console.log("pre tag:"+this.tag)
+                    // console.log("pre tag:"+this.tag)
                     this.tag[i] = tag
-                    console.log("single tag:"+tag)
+                    console.log("tag:"+this.tag)
                 })
                 fetch("http://155.138.165.114:3001/users/data",{
                     method:'POST',
@@ -110,7 +119,7 @@
                         'Content-Type': 'application/json'
                     },
                     body:JSON.stringify({
-                        account:account,
+                        account:this.$store.state.currentaccount,
                         tagList:this.tag
                     })
                 })
@@ -131,7 +140,7 @@
                         'Content-Type': 'application/json'
                     },
                     body:JSON.stringify({
-                        account:this.account,
+                        account:this.$store.state.currentaccount,
                         tagList:this.tag
                     })
                 })
@@ -151,14 +160,16 @@
                 const recommendList2 = await Promise.all(
                     this.similar_id.map(id=>{
                         return ProductListContract.methods.getDetail(id).call({
-                            from:this.account
+                            from:this.$store.state.currentaccount
                         })
                     })
                 )
+                console.log("recommendList2:"+recommendList2)
                 const idList2 = await ProductListContract.methods.getproduct().call({
-                    from:this.account
+                    from:this.$store.state.currentaccount
                 })
                 this.idList2 = idList2
+                console.log("this.idList2:"+this.idList2)
                 this.recommendList2 = recommendList2
                 this.recommendList2.map((detail,i)=> {
                     const [name, content, price, img, video, count, role] = Object.values(detail)
@@ -172,7 +183,6 @@
                     this.role = role
                     this.imgsrc[i] = `${ipfsPrefix}${this.img[i]}`
                     console.log("图片地址"+this.imgsrc[i])
-                    // this.id[i] = `/detail/${idList2[i]}`
                 })
             }
         }

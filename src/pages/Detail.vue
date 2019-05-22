@@ -1,7 +1,6 @@
 <template>
-    <div>
+    <div v-if="reload">
         <a-row type='flex' justify="center" style="marginTop:'30px'">
-
             <a-col :span="20">
             <a-form>
                 <a-form-item  label="商品名">
@@ -13,16 +12,19 @@
                 <a-form-item  label="价格">
                     {{price}} ETH
                 </a-form-item>
-
-                <a-form-item  label="可购买数量">
+                <a-form-item  v-if="role ==  '0'" label="供应数量">
                     {{count}}
                 </a-form-item>
-                <a-form-item  label="身份">
-                    <a-upload v-if="role == '0'" :beforeUpload="handleUpload" :showUploadList="false">
+                <a-form-item  v-if="role ==  '2'" label="可购买数量">
+                    {{count}}
+                </a-form-item>
+                <a-form-item>
+                    <div v-if="role === '0'">身份：商家</div>
+                    <a-upload v-if="role === '0'" :beforeUpload="handleUpload" :showUploadList="false">
                         <a-button type='primary'>上传视频</a-button>
                     </a-upload>
-                    <div v-if="role ==  '1'">已购买</div>
-                    <div v-if="role ==  '2'">未购买</div>
+                    <!--<div v-if="role ===  '1'">身份：买家<br></br>已购买</div>-->
+                    <div v-if="role ===  '2'">身份：买家</div>
                 </a-form-item>
                 <a-form-item  label="视频状态">
                 <div v-if="video">
@@ -32,10 +34,10 @@
                     等待商家上传
                 </div>
                 </a-form-item>
-                <a-form-item  label="购买数量">
+                <a-form-item  v-if="role === '2'" label="购买数量">
                     <a-input name='buycount' v-model="buycount" />
                 </a-form-item>
-                <a-form-item  label="购买">
+                <a-form-item  v-if="role ===  '2'" label="购买">
                     <a-button v-if="role === '2'" type='primary' @click="buy">
                         支付{{price*buycount}}ETH
                     </a-button>
@@ -43,7 +45,7 @@
             </a-form>
             </a-col>
         </a-row>
-        <com-ments :id="id"></com-ments>
+
     </div>
 </template>
 
@@ -70,12 +72,19 @@
                 count:0,
                 role:0,
                 price:0,
-                addcomment:false
+                reload:true
             }
         },
         created () {
             this.init()
             //console.log()
+        },
+        watch:{
+            async getAddressChange(val){
+                const detail = await ProductListContract.methods.getDetail(this.id).call({from:this.$store.state.currentaccount})
+                let [name, content, price, img, video, count, role] = Object.values(detail)
+                    this.role = role
+            }
         },
         methods:{
             async init(){
@@ -114,7 +123,7 @@
                 const hide = message.loading('交易上链中',0)
                 await ProductListContract.methods.buy(this.id,this.buycount,time)
                     .send({
-                        from:this.account,
+                        from:this.$store.state.currentaccount,
                         value:new BigNumber(web3.utils.toWei(this.price)*this.buycount),
                         gas:'6000000'
                     })
@@ -145,6 +154,10 @@
                 var videosrc = '';
                 videosrc = `${ipfsPrefix}${this.video}`;
                 return videosrc;
+            },
+            getAddressChange:function(){
+                console.log("检测到账户变化")
+                return this.$store.state.currentuser
             }
         }
     }

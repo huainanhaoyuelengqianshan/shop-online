@@ -1,8 +1,12 @@
 <template>
     <div>
-        <!--<div className="logo">-->
-          <!--<img src="/logo.png" alt=""/>-->
-        <!--</div>-->
+        <div class="logo">
+            <img src="../assets/logo.png" alt=""/>
+        </div>
+        <!--<vue-metamask-->
+                <!--@onComplete="onComplete"-->
+        <!--&gt;-->
+        <!--</vue-metamask>-->
         <a-menu class="menu"
                 theme='dark'
                 mode='horizontal'
@@ -23,10 +27,13 @@
             <a-menu-item key="/recommend">
                 <router-link to='/recommend'>智能推荐</router-link>
             </a-menu-item>
-            <a-menu-item>
+            <!--<a-menu-item key="/ann">-->
+                <!--<router-link to='/ann'>神经网络</router-link>-->
+            <!--</a-menu-item>-->
+            <a-menu-item class="account">
                 <a-button  @click="handleStart" v-if="flag===''"> 开始
                 </a-button>
-                <p v-else>{{flag}}
+                <p class="username" v-else>{{this.$store.state.currentuser}}
                     <a-button  @click="handleLogout">登出
                     </a-button>
                 </p>
@@ -56,8 +63,12 @@
 <script>
 import {notification,message} from 'ant-design-vue'
 import { web3,userContract,saveImageToIpfs,ipfsPrefix} from '../config'
+import VueMetamask from 'vue-metamask';
 export default {
   name: 'Header',
+  components: {
+      VueMetamask,
+  },
   // props:{
   //     SelectedKeys:
   // }
@@ -72,42 +83,52 @@ export default {
         modal_visible:false,
         storage_token:'',
         index:-1,
-        judgeAddress:false
+        judgeAddress:false,
+        web3_check:null,
+        MetaMaskAddress:""
         // defaultSelectedKeys: this.props.location.pathname
     }
   },
     computed:{
-        account: async function(){
-            var account_test = await new Promise(resolve => {
-                setTimeout(async() => {
-                  resolve("async await test...");
-                  await web3.eth.getAccounts()
-               }, 1000);
-            });
-            console.log(account_test)
-            // setInterval (async function(){
-            //     const [account] = await web3.eth.getAccounts()
-            //     account_test = account
-            //     console.log("account"+account)},1000
-            // )
-            // console.log("account_test"+account_test)
-            return account_test
-        },
-        // this.username = localStorage.token
         flag:function(){
             var flag = this.username
             return flag
         }
     },
     created(){
+      this.account()
       this.username = localStorage.token
     },
     methods:{
+        account: async function(){
+            await web3.currentProvider.enable()
+            var [account] =  await web3.eth.getAccounts()
+            console.log("account:" +
+                ""+account)
+            this.MetaMaskAddress = account
+            this.$store.commit('getAccount',account)
+            // console.log("web3.eth.getAccounts: "+await web3.eth.getAccounts())
+            // var account = web3.eth.getAccounts()
+            setInterval(async () => {
+                var [current_account] = await web3.eth.getAccounts()
+                if ( current_account!== account) {
+                    account = current_account
+                    this.MetaMaskAddress = current_account
+                    const hide = message.loading('账户已切换，请重新签名确认身份',2)
+                    this.handleLogout()
+                    console.log("this.MetaMaskAddress:" +
+                        ""+this.MetaMaskAddress)
+                    // this.$store.commit('getAccount', current_account)
+                }
+            }, 500);
+
+        },
         handleStart:async function(){
             if (!window.web3) {//4 先检查是否安装了metamask
                 window.alert('请先安装MetaMask插件');
                 return;
             }
+            await web3.currentProvider.enable()
             const [account] = await web3.eth.getAccounts()
             this.account = account
             this.judgeAddress = await userContract.methods.isExitUserAddress().call({
@@ -119,8 +140,6 @@ export default {
                 // this.handleAuthenticate()
             } else {
                 this.modal_visible = true
-                // this.handleSignup()
-                // this.handleSignMessage()
             }
         },
         handleCancel() {
@@ -135,7 +154,7 @@ export default {
             this.handleSignup()
         },
         handleSignup :async function() {
-            await web3.currentProvider.enable()
+            // await web3.currentProvider.enable()
             const [account] = await web3.eth.getAccounts()
             this.account = account
             const hide = message.loading('正在注册，请稍等',0)
@@ -152,7 +171,7 @@ export default {
             this.nonce = await userContract.methods.createRand().call({
                 from:account
             })
-            const userInfo = await userContract.methods.findUser().call({from:account})
+            var userInfo = await userContract.methods.findUser().call({from:account})
             let [userAddress, username, time, index,img] = Object.values(userInfo)
             console.log("userAddress: "+userAddress)
             this.msg = web3.utils.fromUtf8(`我正在使用MeatMask进行身份确认: ${this.nonce}`)
@@ -171,6 +190,8 @@ export default {
                     this.useruame = '';
                     localStorage.token = ''
                 }, 6000000);
+                this.$store.commit('gologin', username)
+                this.$store.commit('getAccount', account)
             }else{
                 console.log("false")
             }
@@ -178,6 +199,7 @@ export default {
         handleLogout:function () {
             this.username = ''
             localStorage.token = ''
+            this.$store.commit('outlogin')
         }
         }
     }
@@ -188,4 +210,21 @@ export default {
   .menu{
       line-height:64px
   }
+  .logo{
+      width:200px;
+      float: left;
+      margin-right: 15px;
+      margin-top: 15px;
+      margin-left: 5px;
+  }
+  .logo img{
+      width:100%;
+  }
+    .account{
+        float:right;
+    }
+    .username{
+        /*font-size: 16px;*/
+        /*color: ;*/
+    }
 </style>

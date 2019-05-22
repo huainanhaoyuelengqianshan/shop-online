@@ -41,6 +41,11 @@ Vue.use(Router)
           name: 'HostDetail',
           component: () => import('@/pages/HostDetail')
       },
+      {
+          path: '/trade/detail/:address',
+          name: 'TradeDetail',
+          component: () => import('@/pages/ProductDetail')
+      },
   ]
 // })
 const RouterConfig = {

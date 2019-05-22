@@ -23,32 +23,29 @@ contract ProductList{
   }
 
   struct Product{
-    uint productIndex;
-    address  owner;
-    //卖家可以上传视频
-    string name;
-    string content;
-    uint price;
-    string img;
-    string video;
-    uint count;
-    bytes23[] comments;
-    uint time;
-    uint tag;
-    // 用户够买信息
-    // mapping(address=>uint) users;
+    uint productIndex; //商品类别编号
+    address  owner;//商品拥有者
+    string name;//商品名称
+    string content;//商品描述
+    uint price;//商品价格
+    string img;//商品图片
+    string video;//商品视频
+    uint count;//商品可购买数量
+    bytes23[] comments;//商品评论
+    uint time;//上新时间
+    uint tag;//商品所属种类
   }
   struct sec_Product{
-    uint productIndex;
-    uint id;
-    address owner;
-    uint price;
-    string img;
-    bool sell;
-    address[] pre_owner;
-    uint[] pre_price;
-    uint[] time;
-    uint tag;
+    uint productIndex;//商品类别编号
+    uint id;//商品序号
+    address owner;//商品拥有者
+    uint price;//当前商品价格
+    string img;//商品图片
+    bool sell;//是否挂在二手市场售出
+    address[] pre_owner;//曾经的使用者数组
+    uint[] pre_price;//曾经的价格数组
+    uint[] time;//曾经的交易时间记录数组
+    uint tag;//商品所属种类
   }
   Product[] public products;
   sec_Product[] public sec_products;
@@ -62,7 +59,7 @@ contract ProductList{
   }
   // 首次购买
   function buy(uint _productIndex,uint _count,uint _time) public payable{
-    if(products[_productIndex].count - _count >= 0){
+    if(products[_productIndex].count - _count > 0){
       require(products[_productIndex].price * _count == msg.value);
       uint value = msg.value;
       // 分成
@@ -92,13 +89,14 @@ contract ProductList{
   }
   //二手交易卖出
   function sec_sell(uint _id,uint _sec_price,string _sec_img) public {
-    sec_products[_id].sell = true;
+    bool flag = true;
+    sec_products[_id].sell = flag;
     sec_count++;
     sec_products[_id].price = _sec_price;
     sec_products[_id].img = _sec_img;
   }
   //二手交易买入
-  function sec_buy(uint _id,uint _time) public payable {
+  function sec_buy(uint _id,uint _time) public payable{
     if(sec_products[_id].sell == true){
       require(sec_products[_id].price == msg.value);
       uint value = msg.value;
@@ -106,9 +104,10 @@ contract ProductList{
       ceo.transfer(value/100);
       sec_products[_id].owner.transfer(value-value/100);
       //标记为售出，从二手市场移除
-      sec_products[_id].sell = false;
+      bool flag = false;
+      sec_products[_id].sell = flag;//没反应
       //商品所属标记更改
-      sec_products[_id].owner = msg.sender;
+      sec_products[_id].owner = msg.sender;//执行了
 //      //全部商品标号与所属对应关系
 //      producttoowner[_id] = msg.sender;
       ownerProductCount[msg.sender]++;
@@ -120,6 +119,10 @@ contract ProductList{
       msg.sender.transfer(msg.value);
     }
   }
+//  function select_owner(uint _id) public view returns (address){
+//    return
+//      sec_products[_id].owner;
+//  }
   // 获取所有商品信息
   function getproduct() public view returns(uint[]){
     return productsids;
@@ -129,14 +132,14 @@ contract ProductList{
     uint counter = 0;
     for (uint i = 0; i < sec_products.length; i++) {
       if (sec_products[i].sell == true) {
-        result[counter] = i;
+        result[counter] = i + 1;
         counter++;
       }
     }
     return result;
   }
   // 获取二手商品详情
-  function getSecDetail(uint _id) public view returns(string, string,uint,string,uint,uint){
+  function getSecDetail(uint _id) public view returns(string, string,uint,string,uint,uint,uint){
     uint role;
     if(sec_products[_id].owner==msg.sender){
       role = 0; //卖家自己
@@ -148,9 +151,10 @@ contract ProductList{
     products[productindex].name,
     products[productindex].content,
     sec_products[_id].price,
-    products[productindex].img,
+    sec_products[_id].img,
     role,
-    sec_products[_id].tag
+    sec_products[_id].tag,
+    productindex
     );
   }
   function getSecInfo(uint _id) public view returns(address[],uint[],uint[]){//溯源使用
@@ -245,19 +249,16 @@ contract ProductList{
   //    require(msg.sender== sec_products[_id].owner);
   //    sec_products[_id].img = _img;
   //  }
-
-
   function getProductsByOwner() public view returns(uint[]) {
     uint result_count = ownerProductCount[msg.sender];
     uint[] memory result = new uint[](result_count);
     uint counter = 0;
     for (uint i = 0; i < sec_products.length; i++) {
-      if (sec_products[i].owner == msg.sender) {
-        result[counter] = i;
+      if (msg.sender == sec_products[i].owner) {
+        result[counter] = i + 1;
         counter++;
       }
     }
     return result;
   }
-
 }

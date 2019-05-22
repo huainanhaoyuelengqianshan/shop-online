@@ -44,8 +44,7 @@
     export default {
         name: "comments",
         props: {
-          id: Number,
-          tag:Number
+          id: Number
         },
         data () {
             return {
@@ -72,7 +71,6 @@
                     ret.push(readJsonFromIpfs(coms[i],coms[i+1]))
                 }
                 const comments = await Promise.all(ret)
-                console.log("comments:"+this.id+" "+coms)
                 this.account = account
                 this.comments = comments
             },
@@ -92,7 +90,6 @@
                 // 3. ipfs哈希上链
                 const hash1 = hash.slice(0,23)
                 const hash2 = hash.slice(23)
-                console.log("hash"+hash1+hash2)
                 // window.web3.currentProvider.enable()
                 await ProductListContract.methods.createComment(
                     this.id,

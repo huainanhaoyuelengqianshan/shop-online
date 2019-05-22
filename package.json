@@ -9,7 +9,7 @@
     "start": "npm run dev",
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "e2e": "node test/e2e/runner.js",
-    "test": "npm run unit && npm run e2e",
+    "test": "mocha --watch",
     "build": "node build/build.js",
     "compile": "rimraf src/compiled/* && node scripts/compile.js",
     "deploy": "node scripts/deploy.js"
@@ -19,6 +19,7 @@
     "axios": "^0.18.0",
     "babel-plugin-import": "^1.11.0",
     "bignumber.js": "^8.1.1",
+    "ganache-cli": "^6.4.3",
     "ipfs": "^0.34.4",
     "ipfs-api": "^26.1.2",
     "solc": "^0.4.24",
@@ -26,7 +27,10 @@
     "synaptic": "^1.1.4",
     "truffle-hdwallet-provider": "0.0.3",
     "vue": "^2.5.2",
+    "vue-awesome-swiper": "^3.1.3",
+    "vue-metamask": "^1.0.10",
     "vue-router": "^3.0.2",
+    "vuex": "^3.1.1",
     "web3": "^1.0.0-beta.34"
   },
   "devDependencies": {
@@ -54,6 +58,7 @@
     "html-webpack-plugin": "^2.30.1",
     "jest": "^22.0.4",
     "jest-serializer-vue": "^0.3.0",
+    "mocha": "^6.1.4",
     "nightwatch": "^0.9.12",
     "node-notifier": "^5.1.2",
     "optimize-css-assets-webpack-plugin": "^3.2.0",

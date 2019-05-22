@@ -4,17 +4,17 @@ contract user {
 //    string public empty;
     //定义用户数据结构
     struct UserStruct {
-        address userAddress;
-        string username;
-        uint time;
-        uint index;
-        string img;
-        uint[5] predict;
+        address userAddress;//用户地址
+        string username;//用户名
+        uint usertime;//用户注册时间
+        uint userindex;//用户编号
+        string userimg;//用户头像
+        uint[5] predict;//推荐系统中对该用户的个性化推荐商品列表
     }
     //定义用户列表数据结构
     struct UserListStruct {
-        address userAddress;
-        uint index;
+        address userAddress;//用户地址
+        uint userindex;//用户编号
     }
     uint[5] public init = [0,0,0,0,0];
     uint randNonce = 0;
@@ -25,7 +25,7 @@ contract user {
     //判断用户地址是否存在
     function isExitUserAddress() public constant returns(bool) {
         if (userAddresses.length == 0) return false;
-        return (userAddresses[userStruct[msg.sender].index] == msg.sender);
+        return (userAddresses[userStruct[msg.sender].userindex] == msg.sender);
     }
     function createRand() public returns(uint){
         bytes memory encode = abi.encodePacked(now, msg.sender, randNonce);
@@ -36,13 +36,18 @@ contract user {
     //判断用户名是否存在
     function isExitUsername(string _username) public constant returns(bool) {
         if (usernames.length == 0) return false;
-        bytes memory encode = abi.encodePacked(usernames[userListStruct[_username].index]);
+        bytes memory encode = abi.encodePacked(usernames[userListStruct[_username].userindex]);
         return (keccak256(encode) == keccak256(abi.encodePacked(_username)));
     }
     //根据用户名查找对于的address
     function findUserAddressByUsername(string _username) public constant returns (address) {
 //        require(isExitUsername(_username));
         return userListStruct[_username].userAddress;
+    }
+    //根据地址查找对应的用户名
+    function findUsernameByAddress(address _address) public constant returns (string) {
+        //        require(isExitUsername(_username));
+        return userStruct[_address].username;
     }
     //创建用户信息
     function createUser(string _username) public returns (uint) {
@@ -55,7 +60,7 @@ contract user {
     }
     function updateUser(string _img) public {
 //        require(isExitUserAddress());
-        userStruct[msg.sender].img = _img;
+        userStruct[msg.sender].userimg = _img;
     }
     //获取用户个人信息
     function findUser() public constant returns (address, string, uint, uint,string) {
@@ -63,9 +68,9 @@ contract user {
         return (
         userStruct[msg.sender].userAddress,
         userStruct[msg.sender].username,
-        userStruct[msg.sender].time,
-        userStruct[msg.sender].index,
-        userStruct[msg.sender].img
+        userStruct[msg.sender].usertime,
+        userStruct[msg.sender].userindex,
+        userStruct[msg.sender].userimg
         );
     }
     function getPredict() public view returns(uint[5]){

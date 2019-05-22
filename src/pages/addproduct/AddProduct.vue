@@ -30,7 +30,7 @@
                 <a-form-item label="库存量">
                     <a-input name='count' v-model="count" />
                 </a-form-item>
-                <a-form-item label="商品属性（1代表家电，2代表零食，3代表美妆，4代表鞋靴，5代表衣服">
+                <a-form-item label="商品属性（1代表家电，2代表零食，3代表美妆，4代表鞋靴，5代表衣服）">
                     <a-input name='tag' v-model="tag" />
                 </a-form-item>
                 <a-form-item>
